@@ -1,4 +1,3 @@
-import { Link } from "expo-router";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -7,10 +6,7 @@ export default function Index() {
     <View
       style={styles.view}
     >
-      <Text>Platzhalter</Text>
-      <Link href="/login" asChild>
-        <Text style={styles.navButton}>Login Seite</Text>
-      </Link>
+      <Text>Willkommen, Test Text</Text>
     </View>
   );
 }
@@ -21,11 +17,4 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
       },
-      navButton: {
-        width: 100,
-        height: 20,
-        backgroundColor: "coral",
-        borderRadius: 8,
-        textAlign: "center"
-      }
 })

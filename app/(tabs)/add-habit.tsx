@@ -2,10 +2,10 @@ import React from "react";
 import { Text, View } from "react-native";
 
 
-export default function LoginScreen() {
+export default function AddhabitScreen() {
     return (
     <View>
-        <Text>das ist die Login Seite.</Text>
+        <Text>Das ist die Add Habit Seite.</Text>
     </View>
     );
 }
