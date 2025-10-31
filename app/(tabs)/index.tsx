@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { View, StyleSheet, FlatList, RefreshControl } from "react-native";
-import { Card, Text, IconButton, Chip, Button, Divider } from "react-native-paper";
-import db from "@/lib/database"; // .native.ts / .web.ts
-import { useFocusEffect } from "@react-navigation/native";
+import { deleteHabit, getAllHabits } from "@/lib/database";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useEffect, useState } from "react";
+import { Alert, FlatList, Platform, RefreshControl, StyleSheet, View } from "react-native";
+import { Button, Card, Chip, Divider, IconButton, Text } from "react-native-paper";
 
 type Habit = {
   id?: number | string;
@@ -19,24 +19,66 @@ export default function HabitsScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const load = async () => {
-    const rows = await (db as any).getAllHabits?.();
-    // Fallbacks, damit nichts “undefined” rendert
+    const rows = await getAllHabits();
     setHabits((rows ?? []).map((h: Habit) => ({ streak_count: 0, ...h })));
   };
 
-  useEffect(() => { load(); }, []);
-  useFocusEffect(useCallback(() => { load(); }, []));
+  useEffect(() => {
+    load();
+  }, []);
 
-  const onRefresh = async () => { setRefreshing(true); await load(); setRefreshing(false); };
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [])
+  );
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await load();
+    setRefreshing(false);
+  };
+
+  const handleDelete = (id?: number | string) => {
+  if (id == null) return;
+
+  if (Platform.OS === "web") {
+    const ok = typeof window !== "undefined" && window.confirm("Habit löschen? Das kann nicht rückgängig gemacht werden.");
+    if (!ok) return;
+    deleteHabit(id).then(load);
+    return;
+  }
+
+  Alert.alert(
+    "Habit löschen?",
+    "Das kann nicht rückgängig gemacht werden.",
+    [
+      { text: "Abbrechen", style: "cancel" },
+      {
+        text: "Löschen",
+        style: "destructive",
+        onPress: async () => {
+          await deleteHabit(id);
+          await load();
+        },
+      },
+    ]
+  );
+};
+
 
   const renderItem = ({ item }: { item: Habit }) => (
     <Card style={styles.card} mode="elevated">
       <Card.Content>
         <View style={styles.row}>
           <View style={styles.colLeft}>
-            <Text variant="titleMedium" style={styles.title}>{item.title}</Text>
+            <Text variant="titleMedium" style={styles.title}>
+              {item.title}
+            </Text>
             {!!item.description && (
-              <Text variant="bodyMedium" style={styles.description}>{item.description}</Text>
+              <Text variant="bodyMedium" style={styles.description}>
+                {item.description}
+              </Text>
             )}
             <View style={styles.badgesRow}>
               <View style={styles.streakBadge}>
@@ -52,6 +94,12 @@ export default function HabitsScreen() {
             <Chip compact mode="outlined" style={styles.freqChip} textStyle={styles.freqText}>
               {item.frequency.charAt(0).toUpperCase() + item.frequency.slice(1)}
             </Chip>
+            <IconButton
+              icon="trash-can-outline"
+              size={20}
+              accessibilityLabel="Habit löschen"
+              onPress={() => handleDelete(item.id)}
+            />
           </View>
         </View>
       </Card.Content>
@@ -61,15 +109,19 @@ export default function HabitsScreen() {
   return (
     <View style={styles.page}>
       <View style={styles.header}>
-        <Text variant="headlineSmall" style={styles.headerTitle}>Meine Habits</Text>
-        <Button mode="text" onPress={load} icon="reload">Reload</Button>
+        <Text variant="headlineSmall" style={styles.headerTitle}>
+          Habit Tracker
+        </Text>
+        <Button mode="text" onPress={load} icon="reload">
+          Reload
+        </Button>
       </View>
 
       <FlatList
         contentContainerStyle={styles.content}
         data={habits}
         keyExtractor={(it, i) => String(it.id ?? i)}
-        ItemSeparatorComponent={() => <Divider style={{ opacity: 0 }} />} // spacing handled by card margin
+        ItemSeparatorComponent={() => <Divider style={{ opacity: 0 }} />}
         renderItem={renderItem}
         ListEmptyComponent={
           <Text style={styles.empty}>Noch keine Habits – füge über „Habit“ unten eins hinzu.</Text>
@@ -82,13 +134,12 @@ export default function HabitsScreen() {
 }
 
 const styles = StyleSheet.create({
-  // zentrierter Content wie eine Seite
   page: { flex: 1, backgroundColor: "#f5f5f5" },
   content: {
     paddingHorizontal: 16,
     paddingBottom: 24,
-    maxWidth: 800,         // hübsche Breite auf Desktop
-    alignSelf: "center",   // zentrieren im Web
+    maxWidth: 800,
+    alignSelf: "center",
     width: "100%",
   },
 
@@ -112,7 +163,7 @@ const styles = StyleSheet.create({
 
   row: { flexDirection: "row", gap: 12 },
   colLeft: { flex: 1 },
-  colRight: { justifyContent: "center" },
+  colRight: { justifyContent: "center", flexDirection: "row", alignItems: "center", gap: 4 },
 
   title: { color: "#22223b", marginBottom: 4, fontWeight: "700" },
   description: { color: "#6c6c80" },

@@ -45,4 +45,14 @@ export async function getAllHabits(): Promise<Habit[]> {
   return rows;
 }
 
-export default { initDB, insertHabit, getAllHabits };
+export async function deleteHabit(id: number | string): Promise<{ changes: number }> {
+  const database = await initDB();
+  const numericId = typeof id === "string" ? Number(id) : id;
+  const result = await database.runAsync(
+    `DELETE FROM habits WHERE id = ?`,
+    [numericId]
+  );
+  return { changes: result.changes ?? 0 };
+}
+
+export default { initDB, insertHabit, getAllHabits, deleteHabit };

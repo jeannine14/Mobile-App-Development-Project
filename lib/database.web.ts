@@ -26,8 +26,8 @@ export async function insertHabit(h: {
   title: string; description: string; frequency: Frequency; created_at: number;
 }) {
   const list = read();
-  list.push({
-    id: crypto.randomUUID?.() ?? String(Date.now()),
+  list.unshift({
+    id: globalThis.crypto?.randomUUID?.() ?? String(Date.now()),
     title: h.title,
     description: h.description,
     frequency: h.frequency,
