@@ -1,9 +1,9 @@
 import { deleteHabit, getAllHabits } from "@/lib/database";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, FlatList, Platform, RefreshControl, StyleSheet, View } from "react-native";
-import { Button, Card, Chip, Divider, IconButton, Text } from "react-native-paper";
+import { Card, Chip, Divider, IconButton, Text } from "react-native-paper";
 
 type Habit = {
   id?: number | string;
@@ -13,6 +13,64 @@ type Habit = {
   streak_count?: number;
   created_at: number;
 };
+
+/** ---------- Helpers für ISO-KW + Wochenansicht ---------- */
+function startOfISOWeek(d: Date) {
+  const date = new Date(d);
+  const day = (date.getDay() + 6) % 7; // Mo=0 ... So=6
+  date.setDate(date.getDate() - day);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function getISOWeek(d: Date) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = (date.getUTCDay() + 6) % 7 + 1; // Mo=1 ... So=7
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+}
+
+function useWeek() {
+  return useMemo(() => {
+    const today = new Date();
+    const kw = getISOWeek(today);
+    const weekStart = startOfISOWeek(today);
+    const days = Array.from({ length: 7 }).map((_, i) => {
+      const d = new Date(weekStart);
+      d.setDate(weekStart.getDate() + i);
+      const isToday = d.toDateString() === today.toDateString();
+      // "Mo", "Di", ... ohne Punkt
+      const wday = new Intl.DateTimeFormat("de-DE", { weekday: "short" })
+        .format(d)
+        .replace(".", "");
+      const dayNum = d.getDate();
+      return { date: d, label: wday, num: dayNum, isToday };
+    });
+    return { kw, days };
+  }, []);
+}
+
+/** ---------- Wochen-Header-Komponente ---------- */
+function WeekHeader() {
+  const { kw, days } = useWeek();
+
+  return (
+    <View style={styles.weekHeader}>
+      <Text variant="titleMedium" style={styles.kwText}>KW {kw}</Text>
+
+      <View style={styles.daysRow}>
+        {days.map((d) => (
+          <View key={d.date.toISOString()} style={styles.dayCol}>
+            <Text style={[styles.dayNum, d.isToday && [styles.bold, styles.todayText]]}>{d.num}</Text>
+            <Text style={[styles.dayLabel, d.isToday && [styles.bold, styles.todayText]]}>{d.label}</Text>
+
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
 
 export default function HabitsScreen() {
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -40,32 +98,31 @@ export default function HabitsScreen() {
   };
 
   const handleDelete = (id?: number | string) => {
-  if (id == null) return;
+    if (id == null) return;
 
-  if (Platform.OS === "web") {
-    const ok = typeof window !== "undefined" && window.confirm("Habit löschen? Das kann nicht rückgängig gemacht werden.");
-    if (!ok) return;
-    deleteHabit(id).then(load);
-    return;
-  }
+    if (Platform.OS === "web") {
+      const ok = typeof window !== "undefined" && window.confirm("Habit löschen? Das kann nicht rückgängig gemacht werden.");
+      if (!ok) return;
+      deleteHabit(id).then(load);
+      return;
+    }
 
-  Alert.alert(
-    "Habit löschen?",
-    "Das kann nicht rückgängig gemacht werden.",
-    [
-      { text: "Abbrechen", style: "cancel" },
-      {
-        text: "Löschen",
-        style: "destructive",
-        onPress: async () => {
-          await deleteHabit(id);
-          await load();
+    Alert.alert(
+      "Habit löschen?",
+      "Das kann nicht rückgängig gemacht werden.",
+      [
+        { text: "Abbrechen", style: "cancel" },
+        {
+          text: "Löschen",
+          style: "destructive",
+          onPress: async () => {
+            await deleteHabit(id);
+            await load();
+          },
         },
-      },
-    ]
-  );
-};
-
+      ]
+    );
+  };
 
   const renderItem = ({ item }: { item: Habit }) => (
     <Card style={styles.card} mode="elevated">
@@ -112,10 +169,10 @@ export default function HabitsScreen() {
         <Text variant="headlineSmall" style={styles.headerTitle}>
           Habit Tracker
         </Text>
-        <Button mode="text" onPress={load} icon="reload">
-          Reload
-        </Button>
       </View>
+
+      {/* <<< NEU: Kalenderwoche + aktuelle Woche >>> */}
+      <WeekHeader />
 
       <FlatList
         contentContainerStyle={styles.content}
@@ -134,7 +191,7 @@ export default function HabitsScreen() {
 }
 
 const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: "#f5f5f5" },
+  page: { flex: 1, backgroundColor: "white" },
   content: {
     paddingHorizontal: 16,
     paddingBottom: 24,
@@ -156,9 +213,35 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontWeight: "700" },
 
+  weekHeader: {
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    maxWidth: 800,
+    alignSelf: "center",
+    width: "100%",
+  },
+  kwText: { fontWeight: "700", marginBottom: 8 },
+  daysRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+  },
+  dayCol: { alignItems: "center", minWidth: 34 },
+  dayNum: { fontSize: 16 },
+  dayLabel: { fontSize: 12, opacity: 0.75, marginTop: 2 },
+  bold: { fontWeight: "700" },
+
+  todayText: {
+  color: "palevioletred",
+},
+
   card: {
     marginVertical: 8,
     borderRadius: 16,
+    backgroundColor: "#ececec"
   },
 
   row: { flexDirection: "row", gap: 12 },
@@ -172,15 +255,15 @@ const styles = StyleSheet.create({
   streakBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff3e0",
+    backgroundColor: "black",
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  streakText: { marginLeft: 6, color: "#ff9800", fontWeight: "700" },
+  streakText: { marginLeft: 6, color: "white", fontWeight: "700" },
 
-  freqChip: { backgroundColor: "#ede7f6", borderColor: "#e0d7ff" },
-  freqText: { color: "#7c4dff", fontWeight: "700" },
+  freqChip: { backgroundColor: "white", borderColor: "black" },
+  freqText: { color: "black", fontWeight: "700" },
 
   empty: { textAlign: "center", color: "#666", marginTop: 32 },
 });
