@@ -1,88 +1,70 @@
-import * as SQLite from "expo-sqlite";
-
-export type Frequency = "Täglich" | "weWöchentlich" | "Monatlich";
-export type HabitRow = {
-  id: number;
+// lib/database.web.ts
+export type Habit = {
+  id: string;
   title: string;
-  description: string | null;
-  frequency: Frequency;
+  description?: string;
+  frequency: string; // "Täglich"
   created_at: number;
-  streak_count: number;         // NEW
-  last_completed: number | null; // NEW (ms since epoch)
 };
 
-let db: SQLite.SQLiteDatabase | null = null;
+export type Completion = {
+  id: string;
+  habit_id: string;
+  completed_at: number;
+};
+
+const HABITS = "habits";
+const COMPLETIONS = "completions";
+
+function read<T>(key: string): T[] {
+  try {
+    return JSON.parse(localStorage.getItem(key) || "[]");
+  } catch {
+    return [];
+  }
+}
+function write<T>(key: string, data: T[]) {
+  localStorage.setItem(key, JSON.stringify(data));
+}
 
 export async function initDB() {
-  if (!db) {
-    db = await SQLite.openDatabaseAsync("habits.db");
-    await db.execAsync(`
-      PRAGMA journal_mode = WAL;
-      CREATE TABLE IF NOT EXISTS habits (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        description TEXT,
-        frequency TEXT NOT NULL,
-        created_at INTEGER NOT NULL,
-        streak_count INTEGER NOT NULL DEFAULT 0,
-        last_completed INTEGER
-      );
-    `);
-    /* if you created the table earlier without the two columns,
-       this adds them on old installs (SQLite allows ADD COLUMN) */
-    await db.execAsync(`ALTER TABLE habits ADD COLUMN streak_count INTEGER NOT NULL DEFAULT 0;`).catch(()=>{});
-    await db.execAsync(`ALTER TABLE habits ADD COLUMN last_completed INTEGER;`).catch(()=>{});
-  }
-  return db!;
+  return true;
 }
 
-export async function getAllHabits(): Promise<HabitRow[]> {
-  const database = await initDB();
-  return database.getAllAsync<HabitRow>(
-    `SELECT id, title, description, frequency, created_at, streak_count, last_completed
-     FROM habits ORDER BY created_at DESC`
+export async function insertHabit(h: Omit<Habit, "id">) {
+  const list = read<Habit>(HABITS);
+  list.push({
+    id: crypto.randomUUID?.() ?? String(Date.now()),
+    ...h,
+    frequency: "Täglich",
+  });
+  write(HABITS, list);
+}
+
+export async function deleteHabit(id: string) {
+  write(HABITS, read<Habit>(HABITS).filter((x) => x.id !== id));
+  write(
+    COMPLETIONS,
+    read<Completion>(COMPLETIONS).filter((c) => c.habit_id !== id)
   );
 }
 
-export async function insertHabit(h: {
-  title: string; description: string; frequency: Frequency; created_at: number;
-}) {
-  const database = await initDB();
-  await database.runAsync(
-    `INSERT INTO habits (title, description, frequency, created_at)
-     VALUES (?, ?, ?, ?)`,
-    [h.title, h.description, h.frequency, h.created_at]
-  );
+export async function getAllHabits(): Promise<Habit[]> {
+  return read<Habit>(HABITS).sort((a, b) => b.created_at - a.created_at);
 }
 
-export async function deleteHabit(id: number) {
-  const database = await initDB();
-  await database.runAsync(`DELETE FROM habits WHERE id = ?`, [id]);
+export async function addCompletion(habitId: string, when: number) {
+  const list = read<Completion>(COMPLETIONS);
+  list.push({
+    id: crypto.randomUUID?.() ?? String(Date.now()),
+    habit_id: habitId,
+    completed_at: when,
+  });
+  write(COMPLETIONS, list);
 }
 
-/** Mark as completed "today" (increments streak once per day) */
-export async function completeHabit(id: number) {
-  const database = await initDB();
-  const [row] = await database.getAllAsync<HabitRow>(
-    `SELECT id, streak_count, last_completed FROM habits WHERE id = ?`,
-    [id]
-  );
-
-  const now = Date.now();
-  const isSameDay = (a?: number | null, b?: number | null) => {
-    if (!a || !b) return false;
-    const A = new Date(a); A.setHours(0,0,0,0);
-    const B = new Date(b); B.setHours(0,0,0,0);
-    return A.getTime() === B.getTime();
-  };
-
-  const alreadyToday = row && isSameDay(row.last_completed ?? undefined, now);
-  const nextStreak = row ? (alreadyToday ? row.streak_count : row.streak_count + 1) : 1;
-
-  await database.runAsync(
-    `UPDATE habits SET streak_count = ?, last_completed = ? WHERE id = ?`,
-    [nextStreak, now, id]
+export async function getAllCompletions(): Promise<Completion[]> {
+  return read<Completion>(COMPLETIONS).sort(
+    (a, b) => a.completed_at - b.completed_at
   );
 }
-
-export default { initDB, getAllHabits, insertHabit, deleteHabit, completeHabit };

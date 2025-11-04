@@ -1,66 +1,70 @@
-export type Frequency = "Täglich" | "Wöchentlich" | "Monatlich";
-export type HabitRow = {
+// lib/database.web.ts
+export type Habit = {
   id: string;
   title: string;
-  description: string;
-  frequency: Frequency;
+  description?: string;
+  frequency: string; // "Täglich"
   created_at: number;
-  streak_count: number;
-  last_completed: number | null;
 };
 
-const KEY = "habits";
-
-const read = (): HabitRow[] => {
-  try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch { return []; }
+export type Completion = {
+  id: string;
+  habit_id: string;
+  completed_at: number;
 };
-const write = (list: HabitRow[]) => localStorage.setItem(KEY, JSON.stringify(list));
 
-export async function initDB() {}
+const HABITS = "habits";
+const COMPLETIONS = "completions";
 
-export async function getAllHabits(): Promise<HabitRow[]> {
-  return read().sort((a,b) => b.created_at - a.created_at);
+function read<T>(key: string): T[] {
+  try {
+    return JSON.parse(localStorage.getItem(key) || "[]");
+  } catch {
+    return [];
+  }
+}
+function write<T>(key: string, data: T[]) {
+  localStorage.setItem(key, JSON.stringify(data));
 }
 
-export async function insertHabit(h: {
-  title: string; description: string; frequency: Frequency; created_at: number;
-}) {
-  const list = read();
-  list.unshift({
-    id: globalThis.crypto?.randomUUID?.() ?? String(Date.now()),
-    title: h.title,
-    description: h.description,
-    frequency: h.frequency,
-    created_at: h.created_at,
-    streak_count: 0,
-    last_completed: null,
+export async function initDB() {
+  return true;
+}
+
+export async function insertHabit(h: Omit<Habit, "id">) {
+  const list = read<Habit>(HABITS);
+  list.push({
+    id: crypto.randomUUID?.() ?? String(Date.now()),
+    ...h,
+    frequency: "Täglich",
   });
-  write(list);
+  write(HABITS, list);
 }
 
 export async function deleteHabit(id: string) {
-  write(read().filter(h => h.id !== id));
+  write(HABITS, read<Habit>(HABITS).filter((x) => x.id !== id));
+  write(
+    COMPLETIONS,
+    read<Completion>(COMPLETIONS).filter((c) => c.habit_id !== id)
+  );
 }
 
-export async function completeHabit(id: string) {
-  const list = read();
-  const now = Date.now();
-  const isSameDay = (t?: number | null) => {
-    if (!t) return false;
-    const A = new Date(t); A.setHours(0,0,0,0);
-    const B = new Date(now); B.setHours(0,0,0,0);
-    return A.getTime() === B.getTime();
-  };
-  const idx = list.findIndex(h => h.id === id);
-  if (idx >= 0) {
-    const h = list[idx];
-    list[idx] = {
-      ...h,
-      streak_count: isSameDay(h.last_completed) ? h.streak_count : h.streak_count + 1,
-      last_completed: now,
-    };
-    write(list);
-  }
+export async function getAllHabits(): Promise<Habit[]> {
+  return read<Habit>(HABITS).sort((a, b) => b.created_at - a.created_at);
 }
 
-export default { initDB, getAllHabits, insertHabit, deleteHabit, completeHabit };
+export async function addCompletion(habitId: string, when: number) {
+  const list = read<Completion>(COMPLETIONS);
+  list.push({
+    id: crypto.randomUUID?.() ?? String(Date.now()),
+    habit_id: habitId,
+    completed_at: when,
+  });
+  write(COMPLETIONS, list);
+}
+
+export async function getAllCompletions(): Promise<Completion[]> {
+  return read<Completion>(COMPLETIONS).sort(
+    (a, b) => a.completed_at - b.completed_at
+  );
+}
