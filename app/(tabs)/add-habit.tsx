@@ -2,7 +2,7 @@ import { initDB, insertHabit } from "@/lib/database";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
-import { Button, TextInput } from "react-native-paper";
+import { Button, Text, TextInput } from "react-native-paper";
 
 export default function AddHabitScreen() {
   const [title, setTitle] = useState("");
@@ -18,9 +18,6 @@ export default function AddHabitScreen() {
       await insertHabit({
         title,
         description,
-        // nicht sichtbar, aber gespeichert:
-        // die DB setzt ohnehin "Täglich" (siehe unten),
-        // hier setzen wir es zusätzlich explizit.
         frequency: "Täglich",
         created_at: Date.now(),
       });
@@ -36,40 +33,82 @@ export default function AddHabitScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        label="Titel"
-        value={title}
-        onChangeText={setTitle}
-        style={styles.input}
-        mode="outlined"
-        theme={{ colors: { background: "#ececec", primary: "palevioletred" } }}
-      />
-      <TextInput
-        label="Beschreibung"
-        value={description}
-        onChangeText={setDescription}
-        style={styles.input}
-        mode="outlined"
-        theme={{ colors: { background: "#ececec", primary: "palevioletred" } }}
-      />
+    <View style={styles.page}>
+      {/* Header wie bei Index/Streaks */}
+      <View style={styles.header}>
+        <Text variant="headlineSmall" style={styles.headerTitle}>
+          Habit erstellen
+        </Text>
+      </View>
 
-      {/* keine Frequenz-Auswahl mehr */}
+      {/* Inhalt */}
+      <View style={styles.content}>
+        <View style={styles.formCard}>
+          <TextInput
+            label="Titel"
+            value={title}
+            onChangeText={setTitle}
+            style={styles.input}
+            mode="outlined"
+            // nur Hintergrund lokal setzen, primary kommt aus globalem Theme
+            theme={{ colors: { background: "#ececec" } }}
+          />
+          <TextInput
+            label="Beschreibung"
+            value={description}
+            onChangeText={setDescription}
+            style={styles.input}
+            mode="outlined"
+            theme={{ colors: { background: "#ececec" } }}
+          />
 
-      <Button
-        mode="contained"
-        onPress={handleSubmit}
-        disabled={!title || !description}
-        buttonColor="palevioletred"
-        textColor="#fff"
-      >
-        Habit hinzufügen
-      </Button>
+          <Button
+            mode="contained"
+            onPress={handleSubmit}
+            disabled={!title || !description}
+            // keine buttonColor nötig – nutzt theme.colors.primary (palevioletred)
+          >
+            Habit hinzufügen
+          </Button>
+        </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#f5f5f5", justifyContent: "center" },
-  input: { marginBottom: 16 },
+  page: {
+    flex: 1,
+    backgroundColor: "white",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 4,
+    maxWidth: 800,
+    alignSelf: "center",
+    width: "100%",
+  },
+  headerTitle: {
+    fontWeight: "700",
+  },
+  content: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 24,
+    maxWidth: 800,
+    alignSelf: "center",
+    width: "100%",
+  },
+  formCard: {
+    backgroundColor: "#ececec",
+    borderRadius: 24,
+    padding: 16,
+  },
+  input: {
+    marginBottom: 16,
+  },
 });

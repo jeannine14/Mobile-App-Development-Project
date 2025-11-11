@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, StyleSheet, FlatList, RefreshControl } from "react-native";
-import { Card, Text, ProgressBar, IconButton, Divider } from "react-native-paper";
+import { addCompletion, getAllCompletions, getAllHabits } from "@/lib/database";
 import { useFocusEffect } from "@react-navigation/native";
-import { getAllHabits, getAllCompletions, addCompletion } from "@/lib/database";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
+import { Card, Divider, IconButton, ProgressBar, Text } from "react-native-paper";
 
 type Habit = {
   id?: number | string;
@@ -161,7 +161,7 @@ export default function StreaksScreen() {
     <View style={styles.page}>
       <View style={styles.header}>
         <Text variant="headlineSmall" style={styles.headerTitle}>
-          Streaks
+          Meine Streaks
         </Text>
       </View>
 

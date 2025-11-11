@@ -68,3 +68,19 @@ export async function getAllCompletions(): Promise<Completion[]> {
     (a, b) => a.completed_at - b.completed_at
   );
 }
+
+export async function updateHabit(
+  id: string,
+  updates: { title: string; description?: string }
+) {
+  const list = read<Habit>(HABITS);
+  const idx = list.findIndex((h) => h.id === id);
+  if (idx === -1) return;
+
+  list[idx] = {
+    ...list[idx],
+    ...updates,
+  };
+
+  write(HABITS, list);
+}

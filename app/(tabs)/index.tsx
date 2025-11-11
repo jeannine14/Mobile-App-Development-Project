@@ -1,21 +1,30 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  View,
-  StyleSheet,
-  FlatList,
-  RefreshControl,
-  TouchableOpacity,
-} from "react-native";
-import { Card, Text, Divider, IconButton } from "react-native-paper";
-import { useFocusEffect } from "@react-navigation/native";
-import {
-  getAllHabits,
-  getAllCompletions,
   addCompletion,
   deleteHabit,
-  type Habit as DBHabit,
+  getAllCompletions,
+  getAllHabits,
+  updateHabit,
   type Completion as DBCompletion,
+  type Habit as DBHabit,
 } from "@/lib/database";
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  View,
+} from "react-native";
+import {
+  Button,
+  Card,
+  Dialog,
+  Divider,
+  IconButton,
+  Portal,
+  Text,
+  TextInput,
+} from "react-native-paper";
 
 /** ---------- Typen ---------- */
 type Habit = DBHabit & { id: number | string };
@@ -68,6 +77,10 @@ export default function HabitsScreen() {
   const [completions, setCompletions] = useState<Completion[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
+  const [editHabit, setEditHabit] = useState<Habit | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+
   const load = async () => {
     const [h, c] = await Promise.all([getAllHabits(), getAllCompletions()]);
     setHabits((h ?? []) as Habit[]);
@@ -103,6 +116,26 @@ export default function HabitsScreen() {
       await addCompletion(habitId as any, Date.now());
       await load();
     }
+  };
+
+  /** Speichern aus dem Bearbeiten-Dialog */
+  const handleSaveEdit = async () => {
+    if (!editHabit) return;
+    const newTitle = editTitle.trim();
+    const newDescription = editDescription.trim();
+
+    if (!newTitle) {
+      // optional: keine leeren Titel zulassen
+      return;
+    }
+
+    await updateHabit(String(editHabit.id), {
+      title: newTitle,
+      description: newDescription,
+    });
+
+    await load();
+    setEditHabit(null);
   };
 
   const { kw, days } = useWeek();
@@ -150,8 +183,18 @@ export default function HabitsScreen() {
               </View>
             </View>
 
+            {/* Icons: Bearbeiten, Heute erledigt, Löschen */}
             <View style={styles.colRight}>
-              {/* „Täglich“-Chip entfällt komplett */}
+              <IconButton
+                icon="pencil-outline"
+                size={20}
+                accessibilityLabel="Habit bearbeiten"
+                onPress={() => {
+                  setEditHabit(item);
+                  setEditTitle(item.title);
+                  setEditDescription(item.description ?? "");
+                }}
+              />
               <IconButton
                 icon="check-circle-outline"
                 size={20}
@@ -179,7 +222,7 @@ export default function HabitsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text variant="headlineSmall" style={styles.headerTitle}>
-          Meine Habits
+          Überblick
         </Text>
       </View>
 
@@ -228,6 +271,36 @@ export default function HabitsScreen() {
         }
         showsVerticalScrollIndicator={false}
       />
+
+      {/* Bearbeiten-Dialog */}
+      <Portal>
+        <Dialog
+          visible={!!editHabit}
+          onDismiss={() => setEditHabit(null)}
+        >
+          <Dialog.Title>Habit bearbeiten</Dialog.Title>
+          <Dialog.Content>
+            <TextInput
+              label="Titel"
+              value={editTitle}
+              onChangeText={setEditTitle}
+              mode="outlined"
+            />
+            <TextInput
+              label="Beschreibung"
+              value={editDescription}
+              onChangeText={setEditDescription}
+              mode="outlined"
+              style={{ marginTop: 12 }}
+              multiline
+            />
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setEditHabit(null)}>Abbrechen</Button>
+            <Button onPress={handleSaveEdit}>Speichern</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 }

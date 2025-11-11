@@ -21,7 +21,7 @@ export default function TabsLayout() {
       <Tabs.Screen
       name="index"
       options={{
-        title: "Meine Habits",
+        title: "Habit Tracker",
         tabBarIcon: ({color, size}) => (
       <Ionicons name="calendar-outline" size={size} color={color} />
       ),
@@ -30,7 +30,7 @@ export default function TabsLayout() {
         <Tabs.Screen
       name="add-habit"
       options={{
-        title: "Habit",
+        title: "Habit Tracker",
         tabBarIcon: ({color, size}) => (
         <MaterialCommunityIcons
         name="plus"
@@ -43,7 +43,7 @@ export default function TabsLayout() {
       <Tabs.Screen
       name="streaks"
       options={{
-        title: "Streaks",
+        title: "Habit Tracker",
         tabBarIcon: ({color, size}) => (
         <MaterialCommunityIcons
         name="chart-line-variant"
