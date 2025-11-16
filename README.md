@@ -1,59 +1,85 @@
 # Habit Tracker App
 
-## Projektidee
-Die Habit Tracker App unterstützt Nutzer:innen dabei, ihre täglichen Gewohnheiten (Habits) zu verfolgen und motiviert durch eine einfache Visualisierung von Fortschritt und Regelmäßigkeit.  
-Die App wird mit **React Native** entwickelt und dient als Semesterprojekt im Modul *Mobile App Development* (HS25, FH Graubünden).
+Semesterprojekt **Mobile App Development** (React Native mit Expo).
+
+Die App hilft Nutzer:innen, ihre Gewohnheiten (Habits) zu erfassen, tägliche Erledigungen zu tracken und Fortschritte/Streaks zu sehen.
+
+## Inhalt
+
+- [Funktionen](#funktionen)
+- [Technologien](#technologien)
+- [Projektstruktur](#projektstruktur)
+- [State-Management & Datenfluss](#state-management--datenfluss)
+- [Setup & Ausführung](#setup--ausführung)
+- [Hinweise zur Bedienung](#hinweise-zur-bedienung)
+- [Bewertungskriterien (Abdeckung)](#bewertungskriterien-abdeckung)
+- [Verantwortlichkeiten](#verantwortlichkeiten)
+- [Bekannte Einschränkungen / Ausblick](#bekannte-einschränkungen--ausblick)
+- [Verwendete Tutorials / Grundlagen](#verwendete-tutorials--grundlagen)
 
 ---
 
 ## Funktionen
-- **Home View**  
-  Übersicht über alle Habits mit Name, Fortschritt und täglichem Abhaken.  
-  → Von hier aus kann ein neues Habit erstellt oder die Detailansicht geöffnet werden.  
 
-- **Add Habit View**  
-  Formular zum Erstellen einer neuen Gewohnheit. Eingabefelder:  
-  - Name (z. B. „Meditieren 10 Minuten“)  
-  - Wiederholungsrhythmus (täglich, mehrmals pro Woche etc.)  
-  - Farbe auswählen  
-  - Erinnerung setzen  
+- **Habits anlegen**
+  - Titel, Beschreibung
+  - Speichern in einer lokalen Datenbank (SQLite/AsyncStorage via `lib/database.*`)
+  - Validierung: Pflichtfelder, Button nur aktiv bei gültiger Eingabe, Inline-Fehlermeldungen
 
-- **Detail View**  
-  Einzelansicht einer Gewohnheit mit Statistiken und Historie.  
-  - Anzeige des Fortschritts in %  
-  - Kalenderübersicht mit erledigten Tagen  
-  - Diagramm (z. B. Linienchart)  
-  - Aktionen: *Reset progress*, *Delete habit*  
+- **Übersicht (Index-Tab)**
+  - Liste aller Habits
+  - Wöchentliche Übersicht (Kalenderwoche + Tage)
+  - Tägliches Abhaken („Heute erledigt“) – pro Tag nur 1× möglich
+  - Bearbeiten eines Habits (Titel/Beschreibung) über Dialog
+  - Löschen eines Habits
 
-- **(Optional) Edit Habit View**  
-  Bearbeitung bestehender Habits (gleiche Eingaben wie bei „Add Habit“).  
+- **Streaks (Statistik-Tab)**
+  - Aktueller Streak (an wie vielen Tagen in Folge erledigt)
+  - Bester Streak
+  - Gesamtanzahl Erledigungen
+  - Wochenfortschritt (z. B. 4 / 7) mit Progress-Bar
 
-- **(Optional) Login View**  
-  Einfache Login-Maske mit E-Mail & Passwort.  
-
----
-
-## Navigation
-- **Home View** ist der zentrale Einstiegspunkt.  
-- Navigation zu:  
-  - **Add Habit View** (neue Gewohnheit anlegen)  
-  - **Detail View** (Details einer Gewohnheit ansehen)  
-- Von der **Detail View** weiter zu:  
-  - **Edit Habit View** oder zurück zur **Home View**.  
-- Nach dem Erstellen oder Bearbeiten eines Habits erfolgt die Rückkehr zur **Home View**.  
+- **Navigation**
+  - Bottom-Tab-Navigation mit drei Tabs:
+    - Übersicht
+    - Neues Habit
+    - Streaks
+  - Header angepasst, konsistente Titel & Farben
 
 ---
 
-## Technische Umsetzung
-- Framework: **React Native**  
-- Navigation: **React Navigation**  
-- State Management: **React Hooks (useState, useEffect)**  
-- Datenhaltung: zunächst lokal im State, optional Erweiterung mit **AsyncStorage**  
-- UI-Komponenten:  
-  - `Text`, `View`, `Image`  
-  - `TextInput`, `Button`, `TouchableOpacity`  
-  - Listen- und Kartenkomponenten für Habits  
+## Technologien
+
+- **React Native** mit [Expo](https://expo.dev/)
+- [expo-router](https://docs.expo.dev/router/introduction/) für Navigation (Stack + Tabs)
+- **TypeScript**
+- **react-native-paper** für UI-Komponenten (Karten, Buttons, Inputs, Dialoge)
+- **Async Storage / SQLite** über `lib/database.native.ts` und `lib/database.web.ts`
 
 ---
 
-## Repository-Struktur
+## Projektstruktur
+
+Grober Überblick:
+
+```text
+app/
+  _layout.tsx        # Root-Layout mit PaperProvider & Stack
+  (tabs)/
+    _layout.tsx      # Tab-Navigation (Index, Add Habit, Streaks)
+    index.tsx        # Übersicht / Liste der Habits
+    add-habit.tsx    # Formular zum Anlegen eines neuen Habits
+    streaks.tsx      # Streak-Ansicht / Statistiken
+
+assets/
+  images/            # App-Icons, Splash, etc.
+
+lib/
+  database.ts        # Abstrakte Datenbank-Funktionen
+  database.native.ts # Implementierung für native Plattformen
+  database.web.ts    # Implementierung für Web
+
+types/
+  router.d.ts        # expo-router Typen (automatisch vom Template)
+
+README.md            # dieses Dokument

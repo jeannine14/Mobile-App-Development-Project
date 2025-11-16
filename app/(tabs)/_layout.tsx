@@ -9,7 +9,7 @@ export default function TabsLayout() {
       headerStyle: { backgroundColor: "whitesmoke"},
       headerShadowVisible: false,
       tabBarStyle: {
-        backgroundColor: "#whitesmoke",
+        backgroundColor: "whitesmoke",
         borderTopWidth: 0,
         elevation: 0,
         shadowOpacity: 0,
@@ -21,7 +21,7 @@ export default function TabsLayout() {
       <Tabs.Screen
       name="index"
       options={{
-        title: "Habit Tracker",
+        title: "Übersicht",
         tabBarIcon: ({color, size}) => (
       <Ionicons name="calendar-outline" size={size} color={color} />
       ),
@@ -30,7 +30,7 @@ export default function TabsLayout() {
         <Tabs.Screen
       name="add-habit"
       options={{
-        title: "Habit Tracker",
+        title: "Neues Habit hinzufügen",
         tabBarIcon: ({color, size}) => (
         <MaterialCommunityIcons
         name="plus"
@@ -43,7 +43,7 @@ export default function TabsLayout() {
       <Tabs.Screen
       name="streaks"
       options={{
-        title: "Habit Tracker",
+        title: "Streaks",
         tabBarIcon: ({color, size}) => (
         <MaterialCommunityIcons
         name="chart-line-variant"

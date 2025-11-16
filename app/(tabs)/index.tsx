@@ -1,30 +1,8 @@
-import {
-  addCompletion,
-  deleteHabit,
-  getAllCompletions,
-  getAllHabits,
-  updateHabit,
-  type Completion as DBCompletion,
-  type Habit as DBHabit,
-} from "@/lib/database";
+import { addCompletion, deleteHabit, getAllCompletions, getAllHabits, updateHabit, type Completion as DBCompletion, type Habit as DBHabit, } from "@/lib/database";
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  View,
-} from "react-native";
-import {
-  Button,
-  Card,
-  Dialog,
-  Divider,
-  IconButton,
-  Portal,
-  Text,
-  TextInput,
-} from "react-native-paper";
+import { Alert, FlatList, RefreshControl, StyleSheet, View, } from "react-native";
+import { Button, Card, Dialog, Divider, IconButton, Portal, Text, TextInput, } from "react-native-paper";
 
 /** ---------- Typen ---------- */
 type Habit = DBHabit & { id: number | string };
@@ -112,10 +90,17 @@ export default function HabitsScreen() {
         String(c.habit_id) === String(habitId) &&
         dayKey(c.completed_at) === today
     );
-    if (!hasToday) {
-      await addCompletion(habitId as any, Date.now());
-      await load();
+
+    if (hasToday) {
+      Alert.alert(
+        "Schon erledigt",
+        "Dieses Habit ist für heute bereits als erledigt markiert."
+      );
+      return;
     }
+
+    await addCompletion(habitId as any, Date.now());
+    await load();
   };
 
   /** Speichern aus dem Bearbeiten-Dialog */
@@ -125,7 +110,10 @@ export default function HabitsScreen() {
     const newDescription = editDescription.trim();
 
     if (!newTitle) {
-      // optional: keine leeren Titel zulassen
+      Alert.alert(
+        "Titel erforderlich",
+        "Bitte gib einen Titel für dein Habit ein."
+      );
       return;
     }
 

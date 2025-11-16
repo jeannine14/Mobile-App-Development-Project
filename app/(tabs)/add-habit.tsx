@@ -7,17 +7,34 @@ import { Button, Text, TextInput } from "react-native-paper";
 export default function AddHabitScreen() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
 
+  // Datenbank einmal initialisieren
   useEffect(() => {
-    initDB().catch(console.error);
+    initDB().catch((err) => {
+      console.error(err);
+      Alert.alert(
+        "Fehler",
+        "Die Datenbank konnte nicht initialisiert werden."
+      );
+    });
   }, []);
 
+  // einfache Validierung
+  const titleError = !title.trim();
+  const descriptionError = !description.trim();
+  const canSubmit = !titleError && !descriptionError && !submitting;
+
   const handleSubmit = async () => {
+    if (!canSubmit) return;
+
     try {
+      setSubmitting(true);
+
       await insertHabit({
-        title,
-        description,
+        title: title.trim(),
+        description: description.trim(),
         frequency: "Täglich",
         created_at: Date.now(),
       });
@@ -25,16 +42,18 @@ export default function AddHabitScreen() {
       setTitle("");
       setDescription("");
       Alert.alert("Gespeichert", "Dein Habit wurde gespeichert.");
-      router.replace("/");
+      router.replace("/"); // zurück zur Übersicht
     } catch (err) {
       console.error(err);
-      Alert.alert("Fehler", "Konnte nicht speichern.");
+      Alert.alert("Fehler", "Konnte das Habit nicht speichern.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
     <View style={styles.page}>
-      {/* Header wie bei Index/Streaks */}
+      {/* Header */}
       <View style={styles.header}>
         <Text variant="headlineSmall" style={styles.headerTitle}>
           Habit erstellen
@@ -50,9 +69,13 @@ export default function AddHabitScreen() {
             onChangeText={setTitle}
             style={styles.input}
             mode="outlined"
-            // nur Hintergrund lokal setzen, primary kommt aus globalem Theme
             theme={{ colors: { background: "#ececec" } }}
+            error={titleError}
           />
+          {titleError && (
+            <Text style={styles.errorText}>Titel ist erforderlich.</Text>
+          )}
+
           <TextInput
             label="Beschreibung"
             value={description}
@@ -60,13 +83,20 @@ export default function AddHabitScreen() {
             style={styles.input}
             mode="outlined"
             theme={{ colors: { background: "#ececec" } }}
+            error={descriptionError}
+            multiline
           />
+          {descriptionError && (
+            <Text style={styles.errorText}>
+              Beschreibung ist erforderlich.
+            </Text>
+          )}
 
           <Button
             mode="contained"
             onPress={handleSubmit}
-            disabled={!title || !description}
-            // keine buttonColor nötig – nutzt theme.colors.primary (palevioletred)
+            disabled={!canSubmit}
+            loading={submitting}
           >
             Habit hinzufügen
           </Button>
@@ -109,6 +139,11 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   input: {
-    marginBottom: 16,
+    marginBottom: 8,
+  },
+  errorText: {
+    color: "crimson",
+    marginBottom: 8,
+    fontSize: 12,
   },
 });

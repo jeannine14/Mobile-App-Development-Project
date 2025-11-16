@@ -1,8 +1,20 @@
 import { addCompletion, getAllCompletions, getAllHabits } from "@/lib/database";
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
-import { Card, Divider, IconButton, ProgressBar, Text } from "react-native-paper";
+import {
+  Alert,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  View,
+} from "react-native";
+import {
+  Card,
+  Divider,
+  IconButton,
+  ProgressBar,
+  Text,
+} from "react-native-paper";
 
 type Habit = {
   id?: number | string;
@@ -33,7 +45,7 @@ function isSameISOWeek(a: Date, b: Date) {
 }
 
 function weeklyTarget() {
-  return 7; // immer täglich
+  return 7; // tägliches Habit
 }
 
 function computeStatsForHabit(habit: Habit, allComps: Completion[]) {
@@ -42,20 +54,25 @@ function computeStatsForHabit(habit: Habit, allComps: Completion[]) {
     .sort((a, b) => a.completed_at - b.completed_at);
 
   const total = comps.length;
-  let last: number | undefined,
-    current = 0,
-    best = 0;
+  let last: number | undefined;
+  let current = 0;
+  let best = 0;
 
   for (const c of comps) {
     const dk = dayKey(c.completed_at);
-    if (last === undefined || dk === last + 1) current += 1;
-    else if (dk !== last) current = 1;
+    if (last === undefined || dk === last + 1) {
+      current += 1;
+    } else if (dk !== last) {
+      current = 1;
+    }
     best = Math.max(best, current);
     last = dk;
   }
 
   const now = new Date();
-  const weekCount = comps.filter((c) => isSameISOWeek(new Date(c.completed_at), now)).length;
+  const weekCount = comps.filter((c) =>
+    isSameISOWeek(new Date(c.completed_at), now)
+  ).length;
   const target = weeklyTarget();
   const weeklyProgress = Math.min(1, target ? weekCount / target : 0);
 
@@ -93,12 +110,21 @@ export default function StreaksScreen() {
     if (habitId == null) return;
     const today = dayKey(Date.now());
     const hasToday = completions.some(
-      (c) => String(c.habit_id) === String(habitId) && dayKey(c.completed_at) === today
+      (c) =>
+        String(c.habit_id) === String(habitId) &&
+        dayKey(c.completed_at) === today
     );
-    if (!hasToday) {
-      await addCompletion(habitId, Date.now());
-      await load();
+
+    if (hasToday) {
+      Alert.alert(
+        "Schon erledigt",
+        "Dieses Habit ist für heute bereits als erledigt markiert."
+      );
+      return;
     }
+
+    await addCompletion(habitId, Date.now());
+    await load();
   };
 
   const rows = useMemo(
@@ -110,7 +136,7 @@ export default function StreaksScreen() {
     [habits, completions]
   );
 
-  const renderItem = ({ item }: { item: typeof rows[number] }) => {
+  const renderItem = ({ item }: { item: (typeof rows)[number] }) => {
     const { habit, stats } = item;
     return (
       <Card style={styles.card} mode="elevated">
@@ -132,9 +158,11 @@ export default function StreaksScreen() {
           )}
 
           <View style={styles.statsRow}>
-            <View style={styles.statBadge}>
-              <Text style={styles.statBadgeText}>{stats.streak}</Text>
-              <Text style={styles.statLabel}>Aktuell</Text>
+            <View className="statBadge">
+              <View style={styles.statBadge}>
+                <Text style={styles.statBadgeText}>{stats.streak}</Text>
+                <Text style={styles.statLabel}>Aktuell</Text>
+              </View>
             </View>
             <View style={styles.statBadgeGold}>
               <Text style={styles.statBadgeText}>{stats.bestStreak}</Text>
