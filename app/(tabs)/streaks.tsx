@@ -1,8 +1,7 @@
-import { addCompletion, getAllCompletions, getAllHabits } from "@/lib/database";
+import { getAllCompletions, getAllHabits } from "@/lib/database";
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Alert,
   FlatList,
   RefreshControl,
   StyleSheet,
@@ -11,7 +10,6 @@ import {
 import {
   Card,
   Divider,
-  IconButton,
   ProgressBar,
   Text,
 } from "react-native-paper";
@@ -106,27 +104,6 @@ export default function StreaksScreen() {
     setRefreshing(false);
   };
 
-  const completeToday = async (habitId?: number | string) => {
-    if (habitId == null) return;
-    const today = dayKey(Date.now());
-    const hasToday = completions.some(
-      (c) =>
-        String(c.habit_id) === String(habitId) &&
-        dayKey(c.completed_at) === today
-    );
-
-    if (hasToday) {
-      Alert.alert(
-        "Schon erledigt",
-        "Dieses Habit ist für heute bereits als erledigt markiert."
-      );
-      return;
-    }
-
-    await addCompletion(habitId, Date.now());
-    await load();
-  };
-
   const rows = useMemo(
     () =>
       habits.map((h) => ({
@@ -145,12 +122,6 @@ export default function StreaksScreen() {
             <Text variant="titleMedium" style={styles.habitTitle}>
               {habit.title}
             </Text>
-            <IconButton
-              icon="check-circle-outline"
-              size={20}
-              onPress={() => completeToday(habit.id)}
-              accessibilityLabel="Heute erledigt"
-            />
           </View>
 
           {!!habit.description && (
@@ -158,11 +129,9 @@ export default function StreaksScreen() {
           )}
 
           <View style={styles.statsRow}>
-            <View className="statBadge">
-              <View style={styles.statBadge}>
-                <Text style={styles.statBadgeText}>{stats.streak}</Text>
-                <Text style={styles.statLabel}>Aktuell</Text>
-              </View>
+            <View style={styles.statBadge}>
+              <Text style={styles.statBadgeText}>{stats.streak}</Text>
+              <Text style={styles.statLabel}>Aktuell</Text>
             </View>
             <View style={styles.statBadgeGold}>
               <Text style={styles.statBadgeText}>{stats.bestStreak}</Text>
@@ -238,7 +207,7 @@ const styles = StyleSheet.create({
   card: { marginVertical: 8, borderRadius: 16, backgroundColor: "#ececec" },
   rowHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     alignItems: "center",
   },
 
