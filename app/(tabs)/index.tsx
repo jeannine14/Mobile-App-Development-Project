@@ -210,7 +210,7 @@ export default function HabitsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text variant="headlineSmall" style={styles.headerTitle}>
-          Überblick
+          Meine Habits
         </Text>
       </View>
 
@@ -251,7 +251,7 @@ export default function HabitsScreen() {
         renderItem={renderItem}
         ListEmptyComponent={
           <Text style={styles.empty}>
-            Noch keine Habits – füge über „Habit“ unten eins hinzu.
+            Du hast derzeit noch keine Habits. Füge unten in der Navigation über „Neues Habit hinzufügen“ eins hinzu.
           </Text>
         }
         refreshControl={

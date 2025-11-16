@@ -2,16 +2,16 @@ import { getAllCompletions, getAllHabits } from "@/lib/database";
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  View,
+    FlatList,
+    RefreshControl,
+    StyleSheet,
+    View,
 } from "react-native";
 import {
-  Card,
-  Divider,
-  ProgressBar,
-  Text,
+    Card,
+    Divider,
+    ProgressBar,
+    Text,
 } from "react-native-paper";
 
 type Habit = {
@@ -174,7 +174,7 @@ export default function StreaksScreen() {
         }
         ListEmptyComponent={
           <Text style={styles.empty}>
-            Noch keine Habits – füge über „Habit“ unten eins hinzu.
+            Du hast derzeit noch keine Habits. Füge unten in der Navigation über „Neues Habit hinzufügen“ eins hinzu.
           </Text>
         }
       />
