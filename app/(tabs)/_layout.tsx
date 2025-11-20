@@ -5,6 +5,7 @@ import React from "react";
 
 export default function TabsLayout() {
   return  (
+    // Tab-Navigation
     <Tabs screenOptions={{
       headerStyle: { backgroundColor: "whitesmoke"},
       headerShadowVisible: false,
@@ -18,6 +19,8 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: "dimgrey",
       }}
       >
+
+      {/* Tab für die Übersicht (Startscreen) */}
       <Tabs.Screen
       name="index"
       options={{
@@ -27,7 +30,8 @@ export default function TabsLayout() {
       ),
     }}
     />
-        <Tabs.Screen
+      {/* Tab für das Formular Neues Habit hinzufügen */}
+      <Tabs.Screen
       name="add-habit"
       options={{
         title: "Neues Habit hinzufügen",
@@ -40,6 +44,7 @@ export default function TabsLayout() {
       ),
     }}
     />
+      {/* Tab für Streaks */}
       <Tabs.Screen
       name="streaks"
       options={{

@@ -1,4 +1,6 @@
 // lib/database.web.ts
+// speichert alles in localStorage
+
 export type Habit = {
   id: string;
   title: string;
@@ -41,6 +43,7 @@ export async function insertHabit(h: Omit<Habit, "id">) {
   write(HABITS, list);
 }
 
+// Habit löschen und dazugehörige Completions ebenfalls entfernen (kaskadierend)
 export async function deleteHabit(id: string) {
   write(HABITS, read<Habit>(HABITS).filter((x) => x.id !== id));
   write(
@@ -49,10 +52,12 @@ export async function deleteHabit(id: string) {
   );
 }
 
+// Alle Habits nach Erstellungsdatum (neueste zuerst) zurückgeben
 export async function getAllHabits(): Promise<Habit[]> {
   return read<Habit>(HABITS).sort((a, b) => b.created_at - a.created_at);
 }
 
+// Neue Completion (Erledigung) hinzufügen
 export async function addCompletion(habitId: string, when: number) {
   const list = read<Completion>(COMPLETIONS);
   list.push({
@@ -63,6 +68,7 @@ export async function addCompletion(habitId: string, when: number) {
   write(COMPLETIONS, list);
 }
 
+// Alle Completions chronologisch (älteste zuerst) zurückgeben
 export async function getAllCompletions(): Promise<Completion[]> {
   return read<Completion>(COMPLETIONS).sort(
     (a, b) => a.completed_at - b.completed_at
@@ -77,6 +83,7 @@ export async function updateHabit(
   const idx = list.findIndex((h) => h.id === id);
   if (idx === -1) return;
 
+  // bestehendes Habit mit neuen Werten überschreiben
   list[idx] = {
     ...list[idx],
     ...updates,

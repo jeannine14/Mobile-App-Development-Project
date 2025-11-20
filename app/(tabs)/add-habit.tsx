@@ -1,4 +1,4 @@
-import { initDB, insertHabit } from "@/lib/database";
+import { initDB, insertHabit } from "@/lib/database"; // DB initialisieren und neues Habit einfügen
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
@@ -24,7 +24,7 @@ export default function AddHabitScreen() {
   // einfache Validierung
   const titleError = !title.trim();
   const descriptionError = !description.trim();
-  const canSubmit = !titleError && !descriptionError && !submitting;
+  const canSubmit = !titleError && !descriptionError && !submitting; // Button nur aktiv, wenn alles ok
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -32,6 +32,7 @@ export default function AddHabitScreen() {
     try {
       setSubmitting(true);
 
+    // neues Habit in die Datenbank einfügen
       await insertHabit({
         title: title.trim(),
         description: description.trim(),

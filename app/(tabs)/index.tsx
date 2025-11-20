@@ -1,5 +1,5 @@
 import { addCompletion, deleteHabit, getAllCompletions, getAllHabits, updateHabit, type Completion as DBCompletion, type Habit as DBHabit, } from "@/lib/database";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native"; // Hook, läuft jedes Mal, wenn der Screen wieder sichtbar wird.
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, FlatList, RefreshControl, StyleSheet, View, } from "react-native";
 import { Button, Card, Dialog, Divider, IconButton, Portal, Text, TextInput, } from "react-native-paper";
@@ -31,6 +31,7 @@ function getISOWeek(d: Date) {
 }
 
 function useWeek() {
+  // Berechnet einmalig aktuelle KW und die 7 Tage
   return useMemo(() => {
     const today = new Date();
     const kw = getISOWeek(today);
@@ -39,6 +40,8 @@ function useWeek() {
       const d = new Date(weekStart);
       d.setDate(weekStart.getDate() + i);
       const isToday = d.toDateString() === today.toDateString();
+
+      // kurzer Wochentagsname auf Deutsch (z.B. Mo, Di)
       const wday = new Intl.DateTimeFormat("de-DE", { weekday: "short" })
         .format(d)
         .replace(".", "");
@@ -51,20 +54,22 @@ function useWeek() {
 
 /** ---------- Screen ---------- */
 export default function HabitsScreen() {
-  const [habits, setHabits] = useState<Habit[]>([]);
-  const [completions, setCompletions] = useState<Completion[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
+  const [habits, setHabits] = useState<Habit[]>([]); // Liste aller Habits
+  const [completions, setCompletions] = useState<Completion[]>([]); // Alle Erledigungen
+  const [refreshing, setRefreshing] = useState(false); // Zustand für Pull-to-Refresh
 
   const [editHabit, setEditHabit] = useState<Habit | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
 
+  // Lädt Habits und Completions aus der Datenbank
   const load = async () => {
     const [h, c] = await Promise.all([getAllHabits(), getAllCompletions()]);
     setHabits((h ?? []) as Habit[]);
     setCompletions((c ?? []) as Completion[]);
   };
 
+  // Initiales Laden beim ersten Rendern
   useEffect(() => {
     load();
   }, []);
@@ -99,6 +104,7 @@ export default function HabitsScreen() {
       return;
     }
 
+    // Neue Erledigung für heute speichern und Daten neu laden
     await addCompletion(habitId as any, Date.now());
     await load();
   };
@@ -109,6 +115,7 @@ export default function HabitsScreen() {
     const newTitle = editTitle.trim();
     const newDescription = editDescription.trim();
 
+    // Validierung: Titel darf nicht leer sein
     if (!newTitle) {
       Alert.alert(
         "Titel erforderlich",
@@ -117,6 +124,7 @@ export default function HabitsScreen() {
       return;
     }
 
+    // Habit in der Datenbank aktualisieren
     await updateHabit(String(editHabit.id), {
       title: newTitle,
       description: newDescription,
@@ -126,7 +134,7 @@ export default function HabitsScreen() {
     setEditHabit(null);
   };
 
-  const { kw, days } = useWeek();
+  const { kw, days } = useWeek(); // aktuelle KW und Wochentage
 
   const renderItem = ({ item }: { item: Habit }) => {
     // Wochenfortschritt: Anzahl completions dieser Woche (max 7)
@@ -337,7 +345,7 @@ const styles = StyleSheet.create({
   dayNum: { fontSize: 16 },
   dayLabel: { fontSize: 12, opacity: 0.75, marginTop: 2 },
   bold: { fontWeight: "700" },
-  todayText: { color: "palevioletred" },
+  todayText: { color: "palevioletred" }, // Farbe für aktuellen Tag
 
   card: {
     marginVertical: 8,

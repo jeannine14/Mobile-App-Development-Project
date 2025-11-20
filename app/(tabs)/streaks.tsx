@@ -1,4 +1,4 @@
-import { getAllCompletions, getAllHabits } from "@/lib/database";
+import { getAllCompletions, getAllHabits } from "@/lib/database"; // Daten aus der DB holen
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -38,6 +38,7 @@ function startOfISOWeek(d: Date) {
   return x;
 }
 
+// Prüfen, ob zwei Daten in derselben ISO-Woche liegen
 function isSameISOWeek(a: Date, b: Date) {
   return startOfISOWeek(a).getTime() === startOfISOWeek(b).getTime();
 }
@@ -46,27 +47,32 @@ function weeklyTarget() {
   return 7; // tägliches Habit
 }
 
+// Statistiken für ein Habit berechnen (Streaks, Gesamt, Wochenfortschritt)
 function computeStatsForHabit(habit: Habit, allComps: Completion[]) {
   const comps = allComps
     .filter((c) => String(c.habit_id) === String(habit.id))
     .sort((a, b) => a.completed_at - b.completed_at);
 
-  const total = comps.length;
+  const total = comps.length; // Gesamtanzahl Erledigungen
   let last: number | undefined;
-  let current = 0;
-  let best = 0;
+  let current = 0; // aktueller Streak
+  let best = 0; // bester Streak
 
+  // Streak anhand aufeinanderfolgender Tage berechnen
   for (const c of comps) {
     const dk = dayKey(c.completed_at);
     if (last === undefined || dk === last + 1) {
+      // gleicher Tag oder direkt am Folgetag -> Streak fortsetzen
       current += 1;
     } else if (dk !== last) {
+      // Lücke, also Streak neu starten
       current = 1;
     }
     best = Math.max(best, current);
     last = dk;
   }
 
+  // wie viele Erledigungen in dieser Woche?
   const now = new Date();
   const weekCount = comps.filter((c) =>
     isSameISOWeek(new Date(c.completed_at), now)
@@ -162,6 +168,7 @@ export default function StreaksScreen() {
         </Text>
       </View>
 
+      {/* Liste aller Habits mit Streak-Infos */}
       <FlatList
         data={rows}
         keyExtractor={(it, i) => String(it.habit.id ?? i)}
@@ -182,6 +189,7 @@ export default function StreaksScreen() {
   );
 }
 
+/** ---------- Styles ---------- */
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: "white" },
   header: {
