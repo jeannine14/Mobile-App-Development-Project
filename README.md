@@ -49,12 +49,12 @@ Die App hilft Nutzer:innen, ihre Gewohnheiten (Habits) zu erfassen, tägliche Er
 ---
 
 ## Technologien
-
-- **React Native** mit [Expo](https://expo.dev/)
-- [expo-router](https://docs.expo.dev/router/introduction/) für Navigation (Stack + Tabs)
-- **TypeScript**
-- **react-native-paper** für UI-Komponenten (Karten, Buttons, Inputs, Dialoge)
-- **Async Storage / SQLite** über `lib/database.native.ts` und `lib/database.web.ts`
+- **React Native** mit Expo
+- expo-router für Navigation (Stack + Tabs)
+- TypeScript
+- react-native-paper für UI-Komponenten (Karten, Buttons, Inputs, Dialoge)
+- Native (iOS/Android): SQLite über lib/database.native.ts (expo-sqlite)
+- Web: Browser localStorage über lib/database.web.ts
 
 ---
 
