@@ -2,27 +2,25 @@
 
 Semesterprojekt **Mobile App Development** (React Native mit Expo).
 
-Die App hilft Nutzer:innen, ihre Gewohnheiten (Habits) zu erfassen, tägliche Erledigungen zu tracken und Fortschritte/Streaks zu sehen.
+Die App hilft Nutzerinnen und Nutzern, ihre **täglichen** Gewohnheiten (Habits) zu erfassen, Erledigungen zu tracken und Fortschritte/Streaks zu sehen.
 
 ## Inhalt
 
 - [Funktionen](#funktionen)
+- [Setup](#setup)
 - [Technologien](#technologien)
 - [Projektstruktur](#projektstruktur)
-- [State-Management & Datenfluss](#state-management--datenfluss)
-- [Setup & Ausführung](#setup--ausführung)
-- [Hinweise zur Bedienung](#hinweise-zur-bedienung)
-- [Bewertungskriterien (Abdeckung)](#bewertungskriterien-abdeckung)
+- [Annahmen](#Annahmen)
+- [Grenzen](#Grenzen)
 - [Verantwortlichkeiten](#verantwortlichkeiten)
-- [Bekannte Einschränkungen / Ausblick](#bekannte-einschränkungen--ausblick)
-- [Verwendete Tutorials / Grundlagen](#verwendete-tutorials--grundlagen)
+- [Ausblick](#ausblick)
 
 ---
 
 ## Funktionen
 
 - **Habits anlegen**
-  - Titel, Beschreibung
+  - Titel, Beschreibung erforderlich
   - Speichern in einer lokalen Datenbank (SQLite/AsyncStorage via `lib/database.*`)
   - Validierung: Pflichtfelder, Button nur aktiv bei gültiger Eingabe, Inline-Fehlermeldungen
 
@@ -45,6 +43,15 @@ Die App hilft Nutzer:innen, ihre Gewohnheiten (Habits) zu erfassen, tägliche Er
     - Neues Habit
     - Streaks
   - Header angepasst, konsistente Titel & Farben
+
+---
+
+## Setup
+- NodeJs und Expo Go installieren
+- Repository klonen
+- npx expo start (im Terminal eingeben)
+- w (im Terminal eingeben)
+- Danach wird die Habit-App im Browser angezeigt 
 
 ---
 
@@ -83,3 +90,52 @@ types/
   router.d.ts        # expo-router Typen (automatisch vom Template)
 
 README.md            # dieses Dokument
+
+---
+
+## Annahmen
+
+- Die App wird von **einer Person** auf **einem Gerät** verwendet.
+- Alle Daten werden **lokal auf dem Gerät** gespeichert  
+  - Native: SQLite  
+  - Web: `localStorage`
+- Die **Systemzeit und Zeitzone** des Geräts sind korrekt – Streaks und Wochenansicht basieren vollständig auf dem aktuellen Datum.
+- Habits werden als **tägliche Gewohnheiten** verstanden (Ziel: 7 Erledigungen pro Woche).
+
+---
+
+## Grenzen
+
+- Es gibt keine Cloud-Synchronisation und kein Backup.
+- Es gibt keine Authentifizierung (kein Login, keine Benutzerverwaltung).
+- Pro Habit kann ein Tag nur einmal über das Häckchen-Icon als erledigt markiert werden. Nachträgliches Bearbeiten/Löschen einzelner Erledigungen ist nicht vorgesehen.
+- Das Wochenziel ist aktuell fix auf 7 gesetzt.
+- Die App ist derzeit nur auf Deutsch verfügbar.
+- Es gibt keine Push-Notifications oder Erinnerungen. Die App zeigt den Status nur, wenn sie aktiv geöffnet wird.
+
+---
+
+## Verantwortlichkeiten
+
+- Die Habit-App wurde von Jeannine Popp und Irina Mächler kollaborativ konzipiert und umgesetzt.
+- Entscheidungen zu Funktionen, Screens und zum Design wurden immer vorab gemeinsam getroffen. Beide haben abwechselnd am Projekt weitergearbeitet.
+
+- Jeannine 
+  - Fokus auf Streak-Logik (Berechnung aktueller/bester Streak, Wochenfortschritt)
+  - Datenhaltung und -zugriff (z.B. localStorage, Database)
+
+- Irina
+  - Fokus auf Erstellung, Bearbeitung und Löschen von Habits.
+  - Einheitliches UI
+
+---
+
+## Ausblick
+
+Mögliche Erweiterungen, die wir für spätere Versionen der App sehen:
+- Erinnerungen für einzelne Habits, damit nichts vergessen geht
+- Flexible Häufigkeiten (z.B. 3x pro Woche)
+- Login, Benutzerverwaltung
+- Erweiterte Statistiken und Auswertungen (Monatsübersicht, Diagramme)
+- Mehrsprachigkeit (z.B. zusätzlich auch Englisch)
+
