@@ -8,10 +8,10 @@ Die App hilft Nutzerinnen und Nutzern, ihre **täglichen** Gewohnheiten (Habits)
 
 - [Funktionen](#funktionen)
 - [Setup](#setup)
-- [Technologien](#technologien)
 - [Projektstruktur](#projektstruktur)
-- [Annahmen](#Annahmen)
-- [Grenzen](#Grenzen)
+- [Technologien](#technologien)
+- [Annahmen](#annahmen)
+- [Grenzen](#grenzen)
 - [Verantwortlichkeiten](#verantwortlichkeiten)
 - [Ausblick](#ausblick)
 
@@ -24,14 +24,14 @@ Die App hilft Nutzerinnen und Nutzern, ihre **täglichen** Gewohnheiten (Habits)
   - Speichern in einer lokalen Datenbank (SQLite/AsyncStorage via `lib/database.*`)
   - Validierung: Pflichtfelder, Button nur aktiv bei gültiger Eingabe, Inline-Fehlermeldungen
 
-- **Übersicht (Index-Tab)**
+- **Übersicht**
   - Liste aller Habits
   - Wöchentliche Übersicht (Kalenderwoche + Tage)
-  - Tägliches Abhaken („Heute erledigt“) – pro Tag nur 1× möglich
+  - Tägliches Abhaken, pro Tag nur 1× möglich
   - Bearbeiten eines Habits (Titel/Beschreibung) über Dialog
-  - Löschen eines Habits
+  - Löschen eines Habits 
 
-- **Streaks (Statistik-Tab)**
+- **Streaks**
   - Aktueller Streak (an wie vielen Tagen in Folge erledigt)
   - Bester Streak
   - Gesamtanzahl Erledigungen
@@ -40,7 +40,7 @@ Die App hilft Nutzerinnen und Nutzern, ihre **täglichen** Gewohnheiten (Habits)
 - **Navigation**
   - Bottom-Tab-Navigation mit drei Tabs:
     - Übersicht
-    - Neues Habit
+    - Neues Habit hinzufügen
     - Streaks
   - Header angepasst, konsistente Titel & Farben
 
@@ -51,17 +51,7 @@ Die App hilft Nutzerinnen und Nutzern, ihre **täglichen** Gewohnheiten (Habits)
 - Repository klonen
 - npx expo start (im Terminal eingeben)
 - w (im Terminal eingeben)
-- Danach wird die Habit-App im Browser angezeigt 
-
----
-
-## Technologien
-- **React Native** mit Expo
-- expo-router für Navigation (Stack + Tabs)
-- TypeScript
-- react-native-paper für UI-Komponenten (Karten, Buttons, Inputs, Dialoge)
-- Native (iOS/Android): SQLite über lib/database.native.ts (expo-sqlite)
-- Web: Browser localStorage über lib/database.web.ts
+- Danach wird die Habit-App im Browser angezeigt (Einfachste Variante)
 
 ---
 
@@ -90,17 +80,27 @@ types/
   router.d.ts        # expo-router Typen (automatisch vom Template)
 
 README.md            # dieses Dokument
+```
+---
+
+## Technologien
+- React Native mit Expo
+- expo-router für Navigation (Stack + Tabs)
+- TypeScript
+- react-native-paper für UI-Komponenten (Karten, Buttons, Inputs, Dialoge)
+- Native (iOS/Android): SQLite über lib/database.native.ts (expo-sqlite)
+- Web: Browser localStorage über lib/database.web.ts
 
 ---
 
 ## Annahmen
 
-- Die App wird von **einer Person** auf **einem Gerät** verwendet.
-- Alle Daten werden **lokal auf dem Gerät** gespeichert  
+- Die App wird von **einer** Person auf **einem** Gerät verwendet.
+- Alle Daten werden lokal auf dem Gerät gespeichert  
   - Native: SQLite  
   - Web: `localStorage`
-- Die **Systemzeit und Zeitzone** des Geräts sind korrekt – Streaks und Wochenansicht basieren vollständig auf dem aktuellen Datum.
-- Habits werden als **tägliche Gewohnheiten** verstanden (Ziel: 7 Erledigungen pro Woche).
+- Die Systemzeit und Zeitzone des Geräts sind korrekt. Streaks und Wochenansicht basieren auf dem aktuellen Datum.
+- Habits werden als tägliche Gewohnheiten verstanden (Ziel: 7 Erledigungen pro Woche).
 
 ---
 
@@ -117,7 +117,7 @@ README.md            # dieses Dokument
 
 ## Verantwortlichkeiten
 
-- Die Habit-App wurde von Jeannine Popp und Irina Mächler kollaborativ konzipiert und umgesetzt.
+- Das Projekt wurde von Jeannine Popp und Irina Mächler kollaborativ konzipiert und umgesetzt.
 - Entscheidungen zu Funktionen, Screens und zum Design wurden immer vorab gemeinsam getroffen. Beide haben abwechselnd am Projekt weitergearbeitet.
 
 - Jeannine 
@@ -138,4 +138,9 @@ Mögliche Erweiterungen, die wir für spätere Versionen der App sehen:
 - Login, Benutzerverwaltung
 - Erweiterte Statistiken und Auswertungen (Monatsübersicht, Diagramme)
 - Mehrsprachigkeit (z.B. zusätzlich auch Englisch)
+
+---
+
+
+
 
