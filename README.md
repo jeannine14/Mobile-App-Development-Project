@@ -140,7 +140,8 @@ Mögliche Erweiterungen, die wir für spätere Versionen der App sehen:
 - Mehrsprachigkeit (z.B. zusätzlich auch Englisch)
 
 ---
+## Demo
 
-
+Ein Screen-Video kann unter dem folgenden Link aufgerufen werden: https://fhgraubuenden-my.sharepoint.com/:f:/g/personal/maechleirina_fhgr_ch/Ei9Bf2MNxutDrLKsgqS2_awB0PstmYquDAJPoOfKe194Pg?e=r3TiGX
 
 
